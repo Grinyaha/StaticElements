@@ -1,9 +1,19 @@
 <?php
-$elementsPath;
-$configFileName;
-$onlyAdmin;
-$showDebug;
+
+/** @var  $elementsPath string */
+/** @var  $configFileName string */
+/** @var  $onlyAdmin string */
+/** @var  $showDebug string */
+
+
+require_once MODX_BASE_PATH.'assets/lib/Helpers/FS.php';
+if(is_writable($_SERVER['DOCUMENT_ROOT'].'/')===false){
+    $modx->logEvent(2002,3,'Нельзя писать в корень сайта','Нельзя писать в корень сайта');
+    return;
+}
+
 $start = microtime(true);
+$elementsPathRelative = '/'.$elementsPath;
 $elementsPath = $_SERVER['DOCUMENT_ROOT'].'/'.$elementsPath;
 
 $debug = [];
@@ -223,7 +233,7 @@ if(!function_exists('fileRead')) {
     }
 }
 if(!function_exists('getCategoryName')) {
-    function getCategoryName($categoryId)
+    function getCategoryName($categoryId,$newCategoryName = '')
     {
         global $modx;
 
@@ -232,7 +242,8 @@ if(!function_exists('getCategoryName')) {
         $sql = 'SELECT * FROM ' . $C . ' where `id`="' . $categoryId . '"';
         $result = $modx->db->query($sql);
         $result = $modx->db->getRow($result);
-
+        $result = str_replace(['/'],'_',$result);
+        var_dump($result);
         return $result;
 
     }
@@ -304,21 +315,47 @@ if(!function_exists('removeDirectory')) {
         rmdir($dir);
     }
 }
+if(!function_exists('checkWritableFolder')) {
+    function checkWritableFolder($dir){
+        $all = ['/'];
+        $dirs = explode('/',$dir);
+        foreach ($dirs as $dir) {
+            if(empty($dir)) continue;
+            $all[] = $all[count($all)-1].$dir.'/';
+        }
+
+        //так как в корня может не быть прав на запись а в доп папке быть обертаем масив
+        $all = array_reverse($all);
+        foreach ($all as $dir) {
+            $full  = $_SERVER['DOCUMENT_ROOT'].$dir;
+            if(is_dir($full) === false) continue; //папки нет не надо проверять права
+
+            return is_writable($full);
+        }
+        return true;
+    }
+}
 
 $statusCheck = false;
 $eventName = $modx->event->name;
 $eventParams = $modx->Event->params;
 $configPluginFileName = 'config.json';
 
-
+$FS = \Helpers\FS::getInstance();
 
 //конфиг  плагина
-if (!file_exists($elementsPath)) {
 
+if (!file_exists($elementsPath)) {
+    $check = checkWritableFolder($elementsPathRelative);
+    if($check === false){
+        $modx->logEvent(2002,3,'Нехватает прав для создания папрки '.$elementsPathRelative,'Нехватает прав для создания папрки '.$elementsPathRelative);
+        return ;
+    }
     if (!mkdir($elementsPath, 0755)) {
         $modx->logEvent(2002, 3, 'Не створена папка для елементів', 'Не вдалось створити папку');
         return false;
     }
+//    mkdir($elementsPath, 0755);
 }
 
 if (!file_exists($elementsPath . $configPluginFileName)) {
@@ -413,6 +450,7 @@ if (!file_exists($elementsPath . $configFileName)) { //перший старт �
                 $fileText .= '<?php' . PHP_EOL;
             }
             $fileText .= $elemCode;
+
 
             $categoryCheckResp = getCategoryName($elemCategory);
 
@@ -591,18 +629,24 @@ elseif(in_array($eventName,array('OnSnipFormSave','OnChunkFormSave','OnTempFormS
     switch($eventName){
         case 'OnSnipFormSave':
             $element = 'snippets';
+            $table = $modx->getFullTableName('site_snippets');
             break;
         case 'OnChunkFormSave':
             $element = 'chunks';
+            $table = $modx->getFullTableName('site_htmlsnippets');
             break;
         case 'OnTempFormSave':
             $element = 'templates';
+            $table = $modx->getFullTableName('site_templates');
             break;
         case 'OnPluginFormSave':
             $element = 'plugins';
+            $table = $modx->getFullTableName('site_plugins');
             break;
         default:
             $element = 'plugins';
+            $table = $modx->getFullTableName('site_plugins');
+            break;
     }
 
     $fieldNames = getFieldNames($element);
@@ -611,7 +655,9 @@ elseif(in_array($eventName,array('OnSnipFormSave','OnChunkFormSave','OnTempFormS
     $elemName = $_POST[$fieldNames['name']];
     $elemDescription = $_POST[$fieldNames['description']];
     $elemCode = $_POST['post'];
-    $elemCategory = $_POST['categoryid'];
+
+
+    $elemCategory = $modx->db->getValue($modx->db->query("select category from $table where id = ".$modx->event->params['id']));
 
     $expansion = $expansions[$element];
     $fileName = translit($elemName) . '.' . $expansion;
@@ -625,6 +671,7 @@ elseif(in_array($eventName,array('OnSnipFormSave','OnChunkFormSave','OnTempFormS
         $fileText .= '<?php' . PHP_EOL;
     }
     $fileText .= $elemCode;
+
 
     $categoryCheckResp = getCategoryName($elemCategory);
 
@@ -656,6 +703,7 @@ elseif(in_array($eventName,array('OnSnipFormSave','OnChunkFormSave','OnTempFormS
         unlink($oldPathFull . $oldFileName);
 
     }
+
 
     fileWrite($filePathFull . $fileName, $fileText); //збрегшаєм файл
     $config[$element][$elemId] = array(
@@ -699,7 +747,9 @@ elseif(in_array($eventName,array('OnSnipFormDelete','OnChunkFormDelete','OnTempF
         $deleteElemPath = $deleteElemPath.$elementConfig['category'].'/';
     }
     $deleteElemFull = $deleteElemPath. $elementConfig['fileName'];
-    unlink($deleteElemFull);
+    if($FS->checkFile($deleteElemFull) === true){
+        unlink($deleteElemFull);
+    }
     file_put_contents($debugFile,$deleteElemFull);
     $statusCheck = false;
 }
