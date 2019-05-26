@@ -6,6 +6,9 @@
 /** @var  $showDebug string */
 
 
+if($onlyAdmin==1 && empty($_SESSION['mgrShortname'])){
+    return ;
+}
 require_once MODX_BASE_PATH.'assets/lib/Helpers/FS.php';
 if(is_writable($_SERVER['DOCUMENT_ROOT'].'/')===false){
     $modx->logEvent(2002,3,'Нельзя писать в корень сайта','Нельзя писать в корень сайта');
@@ -17,9 +20,7 @@ $elementsPathRelative = '/'.$elementsPath;
 $elementsPath = $_SERVER['DOCUMENT_ROOT'].'/'.$elementsPath;
 
 $debug = [];
-if($onlyAdmin==1 && empty($_SESSION['mgrShortname'])){
-    return ;
-}
+
 if(!empty($_SESSION['mgrShortname']) && $showDebug==1 && $modx->isFrontend() && $modx->event->name!='OnPageNotFound'){
 
     if(!empty($_SESSION['static-debug'])){
