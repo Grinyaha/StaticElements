@@ -243,7 +243,7 @@ if(!function_exists('getCategoryName')) {
         $result = $modx->db->query($sql);
         $result = $modx->db->getRow($result);
         $result = str_replace(['/'],'_',$result);
-        var_dump($result);
+//        var_dump($result);
         return $result;
 
     }
