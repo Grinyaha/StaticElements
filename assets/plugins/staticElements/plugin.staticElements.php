@@ -453,12 +453,12 @@ if (!file_exists($elementsPath . $configFileName)) { //перший старт �
             $fileText .= $elemCode;
 
 
+
             $categoryCheckResp = getCategoryName($elemCategory);
 
-            $categoryName = $categoryCheckResp['category'];
             $filePathFull = $elementsPath . $element . '/';
             if ($elemCategory > 0) { // якщо елемент має категорію
-
+                $categoryName = $categoryCheckResp['category'];
                 $filePathFull .= $categoryName . '/';
             }
 
@@ -802,6 +802,7 @@ $debug['time']=$time;
 $debug['work']=date('d-m-Y h:i:s');
 
 
+
 if($statusCheck){
     $modx->clearCache('full');
     $_SESSION['static-debug']=$debug;
@@ -811,6 +812,18 @@ if($statusCheck){
         location.reload()
         </script>';
         die();
+    }
+    if(!empty($_POST)){
+        $output = '<form method="post" action="'.$redUrl.'" id="myf-form">';
+        foreach($_POST as $key => $value){
+            $output .= '<textarea style="display:none" name="'.$key.'" >'.$value.'</textarea>';
+        }
+        $output .= '</form>
+        <script>
+        document.getElementById("myf-form").submit();
+        </script>
+';
+        echo $output;die();
     }
     header("Location: $redUrl");
     die();
