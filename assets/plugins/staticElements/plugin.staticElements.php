@@ -442,7 +442,8 @@ if (!file_exists($elementsPath . $configFileName)) { //перший старт �
             $elemCode = $re[$responseField['code']];
             $elemCategory = $re[$responseField['category']];
 
-            $fileName = translit($elemName) . '.' . $expansion;
+            //$fileName = translit($elemName) . '.' . $expansion;
+            $fileName = $elemName . '.' . $expansion;
 
             $fileText = 'name:' . $elemName . PHP_EOL;
             $fileText .= 'description:' . $elemDescription . PHP_EOL;
@@ -661,7 +662,8 @@ elseif(in_array($eventName,array('OnSnipFormSave','OnChunkFormSave','OnTempFormS
     $elemCategory = $modx->db->getValue($modx->db->query("select category from $table where id = ".$modx->event->params['id']));
 
     $expansion = $expansions[$element];
-    $fileName = translit($elemName) . '.' . $expansion;
+    //$fileName = translit($elemName) . '.' . $expansion;
+    $fileName = $elemName . '.' . $expansion;
 
 
 
