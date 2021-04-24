@@ -44,7 +44,7 @@ if(!empty($_SESSION['mgrShortname']) && $showDebug==1 && $modx->isFrontend() && 
         font-size:12px;
         background: rgba(0, 0, 0, 0.16);
         padding:10px;
-            z-index: 10000003;
+            z-index: 9999;
     }
 </style>
     ');
@@ -68,9 +68,13 @@ $expansions = array(
 if(!function_exists('translit')) {
     function translit($str)
     {
-        $rus = array('А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ё', 'Ж', 'З', 'И', 'Й', 'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф', 'Х', 'Ц', 'Ч', 'Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я', 'а', 'б', 'в', 'г', 'д', 'е', 'ё', 'ж', 'з', 'и', 'й', 'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у', 'ф', 'х', 'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я');
-        $lat = array('A', 'B', 'V', 'G', 'D', 'E', 'E', 'Gh', 'Z', 'I', 'Y', 'K', 'L', 'M', 'N', 'O', 'P', 'R', 'S', 'T', 'U', 'F', 'H', 'C', 'Ch', 'Sh', 'Sch', 'Y', 'Y', 'Y', 'E', 'Yu', 'Ya', 'a', 'b', 'v', 'g', 'd', 'e', 'e', 'gh', 'z', 'i', 'y', 'k', 'l', 'm', 'n', 'o', 'p', 'r', 's', 't', 'u', 'f', 'h', 'c', 'ch', 'sh', 'sch', 'y', 'y', 'y', 'e', 'yu', 'ya');
-        return str_replace($rus, $lat, $str);
+        global $modx;
+        $str = str_replace('/','-',$str);
+        $str = str_replace('\\','-',$str);
+        //$rus = array('А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ё', 'Ж', 'З', 'И', 'Й', 'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф', 'Х', 'Ц', 'Ч', 'Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я', 'а', 'б', 'в', 'г', 'д', 'е', 'ё', 'ж', 'з', 'и', 'й', 'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у', 'ф', 'х', 'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я');
+        //$lat = array('A', 'B', 'V', 'G', 'D', 'E', 'E', 'Gh', 'Z', 'I', 'Y', 'K', 'L', 'M', 'N', 'O', 'P', 'R', 'S', 'T', 'U', 'F', 'H', 'C', 'Ch', 'Sh', 'Sch', 'Y', 'Y', 'Y', 'E', 'Yu', 'Ya', 'a', 'b', 'v', 'g', 'd', 'e', 'e', 'gh', 'z', 'i', 'y', 'k', 'l', 'm', 'n', 'o', 'p', 'r', 's', 't', 'u', 'f', 'h', 'c', 'ch', 'sh', 'sch', 'y', 'y', 'y', 'e', 'yu', 'ya');
+        //return str_replace($rus, $lat, $str);
+        return $str;
     }
 }
 
@@ -85,6 +89,7 @@ if(!function_exists('str_replace_once')) {
 if(!function_exists('filePars')) {
     function filePars($file)
     {
+        
 
         $name = $file;
         $name = basename($name, ".php");
@@ -442,8 +447,9 @@ if (!file_exists($elementsPath . $configFileName)) { //перший старт �
             $elemCode = $re[$responseField['code']];
             $elemCategory = $re[$responseField['category']];
 
-            //$fileName = translit($elemName) . '.' . $expansion;
-            $fileName = $elemName . '.' . $expansion;
+            $fileName = translit($elemName) . '.' . $expansion;
+            //$modx->logEvent(1,1,$elemName,'Заголовок лога'); 
+            //$fileName = $elemName . '.' . $expansion;
 
             $fileText = 'name:' . $elemName . PHP_EOL;
             $fileText .= 'description:' . $elemDescription . PHP_EOL;
@@ -662,8 +668,8 @@ elseif(in_array($eventName,array('OnSnipFormSave','OnChunkFormSave','OnTempFormS
     $elemCategory = $modx->db->getValue($modx->db->query("select category from $table where id = ".$modx->event->params['id']));
 
     $expansion = $expansions[$element];
-    //$fileName = translit($elemName) . '.' . $expansion;
-    $fileName = $elemName . '.' . $expansion;
+    $fileName = translit($elemName) . '.' . $expansion;
+    //$fileName = $elemName . '.' . $expansion;
 
 
 
