@@ -669,7 +669,14 @@ elseif(in_array($eventName,array('OnSnipFormSave','OnChunkFormSave','OnTempFormS
     $fileText .= 'description:' . $elemDescription . PHP_EOL;
     $fileText .= '======' . PHP_EOL;
     if (in_array($element, array('snippets', 'plugins'))) {
-        $fileText .= '<?php' . PHP_EOL;
+
+        //$modx->logEvent(1,1,$elemCode,'Заголовок лога');
+
+        if(strpos($elemCode,'<?php') === false) {
+            $fileText .= '<?php' . PHP_EOL;
+        }
+     
+        else $fileText .= PHP_EOL;
     }
     $fileText .= $elemCode;
 
