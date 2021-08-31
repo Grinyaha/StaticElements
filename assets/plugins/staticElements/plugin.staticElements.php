@@ -89,7 +89,7 @@ if(!function_exists('str_replace_once')) {
 if(!function_exists('filePars')) {
     function filePars($file)
     {
-        
+
 
         $name = $file;
         $name = basename($name, ".php");
@@ -500,132 +500,136 @@ $config = json_decode($config, true);
 
 if ($eventName == 'OnWebPageInit' || $eventName=='OnManagerPageInit' || $eventName=='OnPageNotFound') {
 
-    foreach ($config as $key => $el) {
+    if(is_array($config)) {
 
-        $element = $key; // нахва едеменьу
-        $elementPath = $elementsPath . $element;
+        foreach ($config as $key => $el) {
 
-        if (!file_exists($elementPath)) {
-            mkdir($elementPath, 0700, true);
-        }
+            $element = $key; // нахва едеменьу
+            $elementPath = $elementsPath . $element;
 
-        $files = array();
-        $parseFiles = array();
-        GetListFiles($elementPath, $files);
-        foreach ($files as $file) {
-            $resp = fileNameParse($elementPath, $file);
-            if (isset($resp)) {
-                $parseFiles[] = $resp;
-            }
-        }
-
-
-        $fieldNames = getFieldNames($element);
-
-
-        foreach ($parseFiles as $file) {
-
-            $categoryId = NULL;
-
-            if (isset($file['category'])) {
-                $categoryId = categoryCheck($file['category']);
-                $categoryId = $categoryId['id'];
+            if (!file_exists($elementPath)) {
+                mkdir($elementPath, 0700, true);
             }
 
-            $response = searchInArray($config[$element], $file['fileName']);
-            //echo $file['fileName'] .' - '.!empty($response).'<br>';
-            if (!empty($response)) { //файл уже є
-
-
-                $fileFull = $elementPath;
-                if (!empty($file['category'])) {
-                    $fileFull .= '/' . $file['category'];
+            $files = array();
+            $parseFiles = array();
+            GetListFiles($elementPath, $files);
+            foreach ($files as $file) {
+                $resp = fileNameParse($elementPath, $file);
+                if (isset($resp)) {
+                    $parseFiles[] = $resp;
                 }
-                $fileFull .= '/' . $file['fileName'];
-                $fileFullParams = filePars($fileFull);
+            }
 
 
-                if (filemtime($fileFull) != $response['date'] && isset($fileFullParams)) {
-                    // echo 'файл оновлено';
-                    $statusCheck= true;
+            $fieldNames = getFieldNames($element);
 
-                    $fieldName = $fieldNames['name'];
-                    $elementTable = $fieldNames['tableName'];
-                    $code = $modx->db->escape($fileFullParams['body']);
-                    $code =  str_replace_once('<?php', '', $code);
 
-                    $removeFirst = ['\r','\n'];
-                    foreach ($removeFirst as $char) {
-                        if(substr($code,0,2) == $char){
-                            $code = substr($code,2);
+            foreach ($parseFiles as $file) {
+
+                $categoryId = NULL;
+
+                if (isset($file['category'])) {
+                    $categoryId = categoryCheck($file['category']);
+                    $categoryId = $categoryId['id'];
+                }
+
+                $response = searchInArray($config[$element], $file['fileName']);
+                //echo $file['fileName'] .' - '.!empty($response).'<br>';
+                if (!empty($response)) { //файл уже є
+
+
+                    $fileFull = $elementPath;
+                    if (!empty($file['category'])) {
+                        $fileFull .= '/' . $file['category'];
+                    }
+                    $fileFull .= '/' . $file['fileName'];
+                    $fileFullParams = filePars($fileFull);
+
+
+                    if (filemtime($fileFull) != $response['date'] && isset($fileFullParams)) {
+                        // echo 'файл оновлено';
+                        $statusCheck = true;
+
+                        $fieldName = $fieldNames['name'];
+                        $elementTable = $fieldNames['tableName'];
+                        $code = $modx->db->escape($fileFullParams['body']);
+                        $code = str_replace_once('<?php', '', $code);
+
+                        $removeFirst = ['\r', '\n'];
+                        foreach ($removeFirst as $char) {
+                            if (substr($code, 0, 2) == $char) {
+                                $code = substr($code, 2);
+                            }
+
                         }
+                        $fields = array(
+                            $fieldNames['name'] => $modx->db->escape($fileFullParams['head']['name']),
+                            $fieldNames['description'] => $modx->db->escape($fileFullParams['head']['description']),
+                            $fieldNames['code'] => $code,
+                            $fieldNames['category'] => 0,
+                        );
 
+                        if (!empty($categoryId)) {
+                            $fields['category'] = $categoryId;
+                        }
+                        $debug['update'][$fieldNames['type']][] = [
+                            'name' => $fileFullParams['head']['name'],
+                        ];
+                        $modx->db->update($fields, $elementTable, 'id = "' . $response['elementId'] . '"');
+                        $config[$element][$response['elementId']]['date'] = filemtime($fileFull); // обновляем дату
                     }
-                    $fields = array(
-                        $fieldNames['name'] => $modx->db->escape($fileFullParams['head']['name']),
-                        $fieldNames['description'] => $modx->db->escape($fileFullParams['head']['description']),
-                        $fieldNames['code'] => $code,
-                        $fieldNames['category'] => 0,
-                    );
 
-                    if (!empty($categoryId)) {
-                        $fields['category'] = $categoryId;
+
+                } else { //новий файл
+
+                    $statusCheck = true;
+                    //echo 'новий файл';
+                    $fileFull = $elementPath;
+                    if (!empty($file['category'])) {
+                        $fileFull .= '/' . $file['category'];
                     }
-                    $debug['update'][$fieldNames['type']][]=[
-                        'name'=>$fileFullParams['head']['name'],
-                    ];
-                    $modx->db->update($fields, $elementTable, 'id = "' . $response['elementId'] . '"');
-                    $config[$element][$response['elementId']]['date'] = filemtime($fileFull); // обновляем дату
-                }
+                    $fileFull .= '/' . $file['fileName'];
 
+                    $fileFullParams = filePars($fileFull);
+                    if (isset($fileFullParams)) {
 
-            } else { //новий файл
+                        $code = $modx->db->escape($fileFullParams['body']);
+                        $code = str_replace_once('<?php', '', $code);
 
-                $statusCheck= true;
-                //echo 'новий файл';
-                $fileFull = $elementPath;
-                if (!empty($file['category'])) {
-                    $fileFull .= '/' . $file['category'];
-                }
-                $fileFull .= '/' . $file['fileName'];
+                        $fields = array(
+                            $fieldNames['name'] => $fileFullParams['head']['name'],
+                            $fieldNames['description'] => $fileFullParams['head']['description'],
+                            $fieldNames['code'] => $code,
+                            $fieldNames['category'] => 0
+                        );
+                        if (!empty($categoryId)) {
+                            $fields['category'] = $categoryId;
+                        }
+                        $name = $modx->db->escape($fileFullParams['head']['name']);
+                        $fieldName = $fieldNames['name'];
+                        $elementTable = $fieldNames['tableName'];
 
-                $fileFullParams = filePars($fileFull);
-                if (isset($fileFullParams)) {
-
-                    $code = $modx->db->escape($fileFullParams['body']);
-                    $code =  str_replace_once('<?php', '', $code);
-
-                    $fields = array(
-                        $fieldNames['name'] => $fileFullParams['head']['name'],
-                        $fieldNames['description'] => $fileFullParams['head']['description'],
-                        $fieldNames['code'] => $code,
-                        $fieldNames['category'] => 0
-                    );
-                    if (!empty($categoryId)) {
-                        $fields['category'] = $categoryId;
-                    }
-                    $name = $modx->db->escape($fileFullParams['head']['name']);
-                    $fieldName = $fieldNames['name'];
-                    $elementTable = $fieldNames['tableName'];
-
-                    $elementId = $modx->db->getValue($modx->db->query("select `id` from $elementTable where $fieldName ='" . $name . "'"));
-
-                    //echo $elementId . ' ' . $file['fileName'] . '<br>';
-                    //новие файлы
-                    $debug['new'][$fieldNames['type']][]=[
-                        'name'=>$fileFullParams['head']['name'],
-                    ];
-
-                    if (empty($elementId)) {
-                        $modx->db->insert($fields, $elementTable);
                         $elementId = $modx->db->getValue($modx->db->query("select `id` from $elementTable where $fieldName ='" . $name . "'"));
-                    } else {
-                        $modx->db->update($fields, $elementTable, 'id = "' . $elementId . '"');
+
+                        //echo $elementId . ' ' . $file['fileName'] . '<br>';
+                        //новие файлы
+                        $debug['new'][$fieldNames['type']][] = [
+                            'name' => $fileFullParams['head']['name'],
+                        ];
+
+                        if (empty($elementId)) {
+                            $modx->db->insert($fields, $elementTable);
+                            $elementId = $modx->db->getValue($modx->db->query("select `id` from $elementTable where $fieldName ='" . $name . "'"));
+                        } else {
+                            $modx->db->update($fields, $elementTable, 'id = "' . $elementId . '"');
+                        }
+                        $config[$element][$elementId] = array('elementName' => $fileFullParams['head']['name'], 'fileName' => $file['fileName'], 'categoryId' => $categoryId, 'category' => $file['category'], 'date' => time());
                     }
-                    $config[$element][$elementId] = array('elementName' => $fileFullParams['head']['name'], 'fileName' => $file['fileName'], 'categoryId' => $categoryId, 'category' => $file['category'], 'date' => time());
                 }
             }
         }
+
     }
 
 }
@@ -683,7 +687,7 @@ elseif(in_array($eventName,array('OnSnipFormSave','OnChunkFormSave','OnTempFormS
         if(strpos($elemCode,'<?php') === false) {
             $fileText .= '<?php' . PHP_EOL;
         }
-     
+
         else $fileText .= PHP_EOL;
     }
     $fileText .= $elemCode;
