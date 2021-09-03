@@ -668,6 +668,7 @@ elseif(in_array($eventName,array('OnSnipFormSave','OnChunkFormSave','OnTempFormS
     $elemDescription = $_POST[$fieldNames['description']];
     $elemCode = $_POST['post'];
 
+    $elemCode = str_replace("\r","", $elemCode);
 
     $elemCategory = $modx->db->getValue($modx->db->query("select category from $table where id = ".$modx->event->params['id']));
 
