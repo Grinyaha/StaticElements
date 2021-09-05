@@ -4,35 +4,35 @@
 /** @var  $configFileName string */
 /** @var  $onlyAdmin string */
 /** @var  $showDebug string */
+/** @var  $translit  string */
 
-
-if($onlyAdmin==1 && empty($_SESSION['mgrShortname'])){
-    return ;
+if ($onlyAdmin == 1 && empty($_SESSION['mgrShortname'])) {
+    return;
 }
-require_once MODX_BASE_PATH.'assets/lib/Helpers/FS.php';
-if(is_writable($_SERVER['DOCUMENT_ROOT'].'/')===false){
-    $modx->logEvent(2002,3,'Нельзя писать в корень сайта','Нельзя писать в корень сайта');
+require_once MODX_BASE_PATH . 'assets/lib/Helpers/FS.php';
+if (is_writable($_SERVER['DOCUMENT_ROOT'] . '/') === false) {
+    $modx->logEvent(2002, 3, 'Нельзя записать в корень сайта', 'Нельзя записать в корень сайта');
     return;
 }
 
 $start = microtime(true);
-$elementsPathRelative = '/'.$elementsPath;
-$elementsPath = $_SERVER['DOCUMENT_ROOT'].'/'.$elementsPath;
+$elementsPathRelative = '/' . $elementsPath;
+$elementsPath = $_SERVER['DOCUMENT_ROOT'] . '/' . $elementsPath;
 
 $debug = [];
 
-if(!empty($_SESSION['mgrShortname']) && $showDebug==1 && $modx->isFrontend() && $modx->event->name!='OnPageNotFound'){
+if (!empty($_SESSION['mgrShortname']) && $showDebug == 1 && $modx->isFrontend() && $modx->event->name != 'OnPageNotFound') {
 
-    if(!empty($_SESSION['static-debug'])){
+    if (!empty($_SESSION['static-debug'])) {
 
         $debugFile = $_SESSION['static-debug'];
 
-        $modx->regClientHTMLBlock( '
+        $modx->regClientHTMLBlock('
     <div id="static-debug">
     <div class="static-title">Static Elements</div>
-    Последнее обновление '.$debugFile['work'].'<br>
-    Время обновление '.$debugFile['time'].' секунд <br>
-    <a href="/static-debug" target="_blank">Детальней</a>
+    Последнее обновление ' . $debugFile['work'] . '<br>
+    Время обновления ' . $debugFile['time'] . ' секунд <br>
+    <a href="/static-debug" target="_blank">Подробнее</a>
 </div>
     
     
@@ -52,7 +52,7 @@ if(!empty($_SESSION['mgrShortname']) && $showDebug==1 && $modx->isFrontend() && 
 }
 global $categoryData;
 $C = $modx->getFullTableName('categories');
-$sql = 'SELECT * FROM ' . $C ;
+$sql = 'SELECT * FROM ' . $C;
 $result = $modx->db->query($sql);
 $categoryDateResp = $modx->db->makeArray($result);
 foreach ($categoryDateResp as $el) {
@@ -60,25 +60,32 @@ foreach ($categoryDateResp as $el) {
 }
 
 $expansions = array(
-    'chunks'=>'tpl',
-    'templates'=>'tpl',
-    'snippets'=>'php',
-    'plugins'=>'php',
+    'chunks' => 'tpl',
+    'templates' => 'tpl',
+    'snippets' => 'php',
+    'plugins' => 'php',
 );
-if(!function_exists('translit')) {
-    function translit($str)
+
+
+if (!function_exists('translit')) {
+    function translit($str, $translit)
     {
         global $modx;
-        $str = str_replace('/','-',$str);
-        $str = str_replace('\\','-',$str);
-        //$rus = array('А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ё', 'Ж', 'З', 'И', 'Й', 'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф', 'Х', 'Ц', 'Ч', 'Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я', 'а', 'б', 'в', 'г', 'д', 'е', 'ё', 'ж', 'з', 'и', 'й', 'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у', 'ф', 'х', 'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я');
-        //$lat = array('A', 'B', 'V', 'G', 'D', 'E', 'E', 'Gh', 'Z', 'I', 'Y', 'K', 'L', 'M', 'N', 'O', 'P', 'R', 'S', 'T', 'U', 'F', 'H', 'C', 'Ch', 'Sh', 'Sch', 'Y', 'Y', 'Y', 'E', 'Yu', 'Ya', 'a', 'b', 'v', 'g', 'd', 'e', 'e', 'gh', 'z', 'i', 'y', 'k', 'l', 'm', 'n', 'o', 'p', 'r', 's', 't', 'u', 'f', 'h', 'c', 'ch', 'sh', 'sch', 'y', 'y', 'y', 'e', 'yu', 'ya');
-        //return str_replace($rus, $lat, $str);
+
+        $str = str_replace('/', '-', $str);
+        $str = str_replace('\\', '-', $str);
+        $modx->logEvent(1, 1, $translit, 'Заголовок лога ДО');
+        if ($translit == 'да') {
+            $modx->logEvent(1, 1, $translit, 'Заголовок лога ПОСЛЕ');
+            $rus = array('А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ё', 'Ж', 'З', 'И', 'Й', 'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф', 'Х', 'Ц', 'Ч', 'Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я', 'а', 'б', 'в', 'г', 'д', 'е', 'ё', 'ж', 'з', 'и', 'й', 'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у', 'ф', 'х', 'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я');
+            $lat = array('A', 'B', 'V', 'G', 'D', 'E', 'E', 'Gh', 'Z', 'I', 'Y', 'K', 'L', 'M', 'N', 'O', 'P', 'R', 'S', 'T', 'U', 'F', 'H', 'C', 'Ch', 'Sh', 'Sch', 'Y', 'Y', 'Y', 'E', 'Yu', 'Ya', 'a', 'b', 'v', 'g', 'd', 'e', 'e', 'gh', 'z', 'i', 'y', 'k', 'l', 'm', 'n', 'o', 'p', 'r', 's', 't', 'u', 'f', 'h', 'c', 'ch', 'sh', 'sch', 'y', 'y', 'y', 'e', 'yu', 'ya');
+            return str_replace($rus, $lat, $str);
+        }
         return $str;
     }
 }
 
-if(!function_exists('str_replace_once')) {
+if (!function_exists('str_replace_once')) {
     function str_replace_once($search, $replace, $text)
     {
         $pos = strpos($text, $search);
@@ -86,7 +93,7 @@ if(!function_exists('str_replace_once')) {
     }
 }
 
-if(!function_exists('filePars')) {
+if (!function_exists('filePars')) {
     function filePars($file)
     {
 
@@ -143,7 +150,7 @@ if(!function_exists('filePars')) {
 
     }
 }
-if(!function_exists('GetListFiles')) {
+if (!function_exists('GetListFiles')) {
     function GetListFiles($folder, &$all_files)
     {
         $fp = opendir($folder);
@@ -157,7 +164,7 @@ if(!function_exists('GetListFiles')) {
         closedir($fp);
     }
 }
-if(!function_exists('categoryCheck')) {
+if (!function_exists('categoryCheck')) {
     function categoryCheck($category)
     {
         global $modx;
@@ -168,15 +175,15 @@ if(!function_exists('categoryCheck')) {
             $fields = array('category' => $cat);
             $newCategoryId = $modx->db->insert($fields, $C);
             $categoryData[$newCategoryId] = [
-                'id'=>$newCategoryId,
-                'category'=>$category,
-                'rank'=>0,
+                'id' => $newCategoryId,
+                'category' => $category,
+                'rank' => 0,
             ];
         }
         return $categoryData[$category];
     }
 }
-if(!function_exists('fileNameParse')) {
+if (!function_exists('fileNameParse')) {
     function fileNameParse($elementPath, $fileName)
     {
 
@@ -195,10 +202,9 @@ if(!function_exists('fileNameParse')) {
         }
     }
 }
-if(!function_exists('fileWrite')) {
+if (!function_exists('fileWrite')) {
     function fileWrite($file, $data)
     {
-        //$file = iconv("UTF-8", "cp1251", $file); //имена файлов кириллицей
         if ($handle = @fopen($file, 'w+')) {
             flock($handle, LOCK_EX);
             fwrite($handle, $data);
@@ -207,7 +213,7 @@ if(!function_exists('fileWrite')) {
         }
     }
 }
-if(!function_exists('searchInArray')) {
+if (!function_exists('searchInArray')) {
     function searchInArray($arr, $val)
     {
 
@@ -222,7 +228,7 @@ if(!function_exists('searchInArray')) {
         return false;
     }
 }
-if(!function_exists('fileRead')) {
+if (!function_exists('fileRead')) {
     function fileRead($fileFull)
     {
         $str = '';
@@ -239,8 +245,8 @@ if(!function_exists('fileRead')) {
         return $str;
     }
 }
-if(!function_exists('getCategoryName')) {
-    function getCategoryName($categoryId,$newCategoryName = '')
+if (!function_exists('getCategoryName')) {
+    function getCategoryName($categoryId, $newCategoryName = '')
     {
         global $modx;
 
@@ -249,13 +255,13 @@ if(!function_exists('getCategoryName')) {
         $sql = 'SELECT * FROM ' . $C . ' where `id`="' . $categoryId . '"';
         $result = $modx->db->query($sql);
         $result = $modx->db->getRow($result);
-        $result = str_replace(['/'],'_',$result);
+        $result = str_replace(['/'], '_', $result);
 //        var_dump($result);
         return $result;
 
     }
 }
-if(!function_exists('getFieldNames')) {
+if (!function_exists('getFieldNames')) {
     function getFieldNames($element)
     {
         //chunks,templates,snippets,plugins
@@ -311,7 +317,7 @@ if(!function_exists('getFieldNames')) {
         return $fieldNames;
     }
 }
-if(!function_exists('removeDirectory')) {
+if (!function_exists('removeDirectory')) {
     function removeDirectory($dir)
     {
         if ($objs = glob($dir . "/*")) {
@@ -322,20 +328,21 @@ if(!function_exists('removeDirectory')) {
         rmdir($dir);
     }
 }
-if(!function_exists('checkWritableFolder')) {
-    function checkWritableFolder($dir){
+if (!function_exists('checkWritableFolder')) {
+    function checkWritableFolder($dir)
+    {
         $all = ['/'];
-        $dirs = explode('/',$dir);
+        $dirs = explode('/', $dir);
         foreach ($dirs as $dir) {
-            if(empty($dir)) continue;
-            $all[] = $all[count($all)-1].$dir.'/';
+            if (empty($dir)) continue;
+            $all[] = $all[count($all) - 1] . $dir . '/';
         }
 
-        //так как в корня может не быть прав на запись а в доп папке быть обертаем масив
+        //так как в корне может не быть прав на запись, а в доп папке быть массив
         $all = array_reverse($all);
         foreach ($all as $dir) {
-            $full  = $_SERVER['DOCUMENT_ROOT'].$dir;
-            if(is_dir($full) === false) continue; //папки нет не надо проверять права
+            $full = $_SERVER['DOCUMENT_ROOT'] . $dir;
+            if (is_dir($full) === false) continue; //папки нет не надо проверять права
 
             return is_writable($full);
         }
@@ -354,12 +361,12 @@ $FS = \Helpers\FS::getInstance();
 
 if (!file_exists($elementsPath)) {
     $check = checkWritableFolder($elementsPathRelative);
-    if($check === false){
-        $modx->logEvent(2002,3,'Нехватает прав для создания папрки '.$elementsPathRelative,'Нехватает прав для создания папрки '.$elementsPathRelative);
-        return ;
+    if ($check === false) {
+        $modx->logEvent(2002, 3, 'Не хватает прав для создания папки ' . $elementsPathRelative, 'Не хватает прав для создания папки ' . $elementsPathRelative);
+        return;
     }
     if (!mkdir($elementsPath, 0755)) {
-        $modx->logEvent(2002, 3, 'Не створена папка для елементів', 'Не вдалось створити папку');
+        $modx->logEvent(2002, 3, 'Не созданы папки для элементов', 'Не удалось создать папку');
         return false;
     }
 //    mkdir($elementsPath, 0755);
@@ -367,39 +374,38 @@ if (!file_exists($elementsPath)) {
 
 if (!file_exists($elementsPath . $configPluginFileName)) {
     $conf = [
-        'path'=>$elementsPath,
-        'domain'=>$_SERVER['HTTP_HOST'],
+        'path' => $elementsPath,
+        'domain' => $_SERVER['HTTP_HOST'],
     ];
-    file_put_contents($elementsPath . $configPluginFileName,json_encode($conf));
-}
-else{
+    file_put_contents($elementsPath . $configPluginFileName, json_encode($conf));
+} else {
     $conf = file_get_contents($elementsPath . $configPluginFileName);
-    $conf = json_decode($conf,true);
-    if($conf['path']!=$elementsPath || $conf['domain']!=$_SERVER['HTTP_HOST']){
+    $conf = json_decode($conf, true);
+    if ($conf['path'] != $elementsPath || $conf['domain'] != $_SERVER['HTTP_HOST']) {
         //'новый сервер';
 
         $delete = [
-            $elementsPath.'chunks',
-            $elementsPath.'snippets',
-            $elementsPath.'templates',
-            $elementsPath.'plugins',
+            $elementsPath . 'chunks',
+            $elementsPath . 'snippets',
+            $elementsPath . 'templates',
+            $elementsPath . 'plugins',
         ];
-        foreach ($delete as $e){
-            if(file_exists($e)){
+        foreach ($delete as $e) {
+            if (file_exists($e)) {
                 removeDirectory($e);
             }
         }
-        if(file_exists($elementsPath.'config.php')){
-            unlink($elementsPath.'config.php');
+        if (file_exists($elementsPath . 'config.php')) {
+            unlink($elementsPath . 'config.php');
         }
 
 
         //новая конфигурация
         $conf = [
-            'path'=>$elementsPath,
-            'domain'=>$_SERVER['HTTP_HOST'],
+            'path' => $elementsPath,
+            'domain' => $_SERVER['HTTP_HOST'],
         ];
-        file_put_contents($elementsPath . $configPluginFileName,json_encode($conf));
+        file_put_contents($elementsPath . $configPluginFileName, json_encode($conf));
         //echo 'новый сервер';
 //        die();
     }
@@ -415,7 +421,7 @@ if (!file_exists($elementsPath . $configFileName)) { //перший старт �
     );
     if (!file_exists($elementsPath)) {
         if (!mkdir($elementsPath, 0755)) {
-            $modx->logEvent(2002, 3, 'Не створена папка для елементів', 'Не вдалось створити папку');
+            $modx->logEvent(2002, 3, 'Не созданы папки для элементов', 'Не удалось создать папку');
             return false;
         }
     }
@@ -427,7 +433,7 @@ if (!file_exists($elementsPath . $configFileName)) { //перший старт �
 
         if (!file_exists($elementsPath . $element)) {  // створюєм папку для елементу
             if (!mkdir($elementsPath . $element, 0755)) {
-                $modx->logEvent(2002, 3, 'Не створена папка для елементу ' . $element, 'Не вдалось створити папку');
+                $modx->logEvent(2002, 3, 'Не созданы папки для элементов ' . $element, 'Не удалось создать папку');
                 return false;
             }
         }
@@ -448,8 +454,8 @@ if (!file_exists($elementsPath . $configFileName)) { //перший старт �
             $elemCode = $re[$responseField['code']];
             $elemCategory = $re[$responseField['category']];
 
-            $fileName = translit($elemName) . '.' . $expansion;
-            //$modx->logEvent(1,1,$elemName,'Заголовок лога'); 
+            $fileName = translit($elemName, $translit) . '.' . $expansion;
+            //$modx->logEvent(1,1,$elemName,'Заголовок лога');
             //$fileName = $elemName . '.' . $expansion;
 
             $fileText = 'name:' . $elemName . PHP_EOL;
@@ -461,24 +467,23 @@ if (!file_exists($elementsPath . $configFileName)) { //перший старт �
             $fileText .= $elemCode;
 
 
-
             $categoryCheckResp = getCategoryName($elemCategory);
 
             $filePathFull = $elementsPath . $element . '/';
-            if ($elemCategory > 0) { // якщо елемент має категорію
+            if ($elemCategory > 0) { // если у элемента есть категория
                 $categoryName = $categoryCheckResp['category'];
                 $filePathFull .= $categoryName . '/';
             }
 
-            if (!file_exists($filePathFull)) {  // створюєм папку для категорії
+            if (!file_exists($filePathFull)) {  // создаем папку для категории
                 if (!mkdir($filePathFull, 0755)) {
-                    $modx->logEvent(2002, 3, 'Не створена папка для категоії ' . $categoryName . ' елемент ' . $element, 'Не вдалось створити папку');
+                    $modx->logEvent(2002, 3, 'Не создана папка для категории ' . $categoryName . ' элемент ' . $element, 'Не удалось создать папку');
                     return false;
                 }
             }
 
 
-            fileWrite($filePathFull . $fileName, $fileText); //збрегшаєм файл
+            fileWrite($filePathFull . $fileName, $fileText); //создаем файл
             $config[$element][$elemId] = array(
                 'elementName' => $elemName,
                 'fileName' => $fileName,
@@ -499,147 +504,143 @@ $config = json_decode($config, true);
 
 //$_GET['q']
 
-if ($eventName == 'OnWebPageInit' || $eventName=='OnManagerPageInit' || $eventName=='OnPageNotFound') {
+if ($eventName == 'OnWebPageInit' || $eventName == 'OnManagerPageInit' || $eventName == 'OnPageNotFound') {
 
-    if(is_array($config)) {
+    foreach ($config as $key => $el) {
 
-        foreach ($config as $key => $el) {
+        $element = $key;
+        $elementPath = $elementsPath . $element;
 
-            $element = $key; // нахва едеменьу
-            $elementPath = $elementsPath . $element;
+        if (!file_exists($elementPath)) {
+            mkdir($elementPath, 0700, true);
+        }
 
-            if (!file_exists($elementPath)) {
-                mkdir($elementPath, 0700, true);
-            }
-
-            $files = array();
-            $parseFiles = array();
-            GetListFiles($elementPath, $files);
-            foreach ($files as $file) {
-                $resp = fileNameParse($elementPath, $file);
-                if (isset($resp)) {
-                    $parseFiles[] = $resp;
-                }
-            }
-
-
-            $fieldNames = getFieldNames($element);
-
-
-            foreach ($parseFiles as $file) {
-
-                $categoryId = NULL;
-
-                if (isset($file['category'])) {
-                    $categoryId = categoryCheck($file['category']);
-                    $categoryId = $categoryId['id'];
-                }
-
-                $response = searchInArray($config[$element], $file['fileName']);
-                //echo $file['fileName'] .' - '.!empty($response).'<br>';
-                if (!empty($response)) { //файл уже є
-
-
-                    $fileFull = $elementPath;
-                    if (!empty($file['category'])) {
-                        $fileFull .= '/' . $file['category'];
-                    }
-                    $fileFull .= '/' . $file['fileName'];
-                    $fileFullParams = filePars($fileFull);
-
-
-                    if (filemtime($fileFull) != $response['date'] && isset($fileFullParams)) {
-                        // echo 'файл оновлено';
-                        $statusCheck = true;
-
-                        $fieldName = $fieldNames['name'];
-                        $elementTable = $fieldNames['tableName'];
-                        $code = $modx->db->escape($fileFullParams['body']);
-                        $code = str_replace_once('<?php', '', $code);
-
-                        $removeFirst = ['\r', '\n'];
-                        foreach ($removeFirst as $char) {
-                            if (substr($code, 0, 2) == $char) {
-                                $code = substr($code, 2);
-                            }
-
-                        }
-                        $fields = array(
-                            $fieldNames['name'] => $modx->db->escape($fileFullParams['head']['name']),
-                            $fieldNames['description'] => $modx->db->escape($fileFullParams['head']['description']),
-                            $fieldNames['code'] => $code,
-                            $fieldNames['category'] => 0,
-                        );
-
-                        if (!empty($categoryId)) {
-                            $fields['category'] = $categoryId;
-                        }
-                        $debug['update'][$fieldNames['type']][] = [
-                            'name' => $fileFullParams['head']['name'],
-                        ];
-                        $modx->db->update($fields, $elementTable, 'id = "' . $response['elementId'] . '"');
-                        $config[$element][$response['elementId']]['date'] = filemtime($fileFull); // обновляем дату
-                    }
-
-
-                } else { //новий файл
-
-                    $statusCheck = true;
-                    //echo 'новий файл';
-                    $fileFull = $elementPath;
-                    if (!empty($file['category'])) {
-                        $fileFull .= '/' . $file['category'];
-                    }
-                    $fileFull .= '/' . $file['fileName'];
-
-                    $fileFullParams = filePars($fileFull);
-                    if (isset($fileFullParams)) {
-
-                        $code = $modx->db->escape($fileFullParams['body']);
-                        $code = str_replace_once('<?php', '', $code);
-
-                        $fields = array(
-                            $fieldNames['name'] => $fileFullParams['head']['name'],
-                            $fieldNames['description'] => $fileFullParams['head']['description'],
-                            $fieldNames['code'] => $code,
-                            $fieldNames['category'] => 0
-                        );
-                        if (!empty($categoryId)) {
-                            $fields['category'] = $categoryId;
-                        }
-                        $name = $modx->db->escape($fileFullParams['head']['name']);
-                        $fieldName = $fieldNames['name'];
-                        $elementTable = $fieldNames['tableName'];
-
-                        $elementId = $modx->db->getValue($modx->db->query("select `id` from $elementTable where $fieldName ='" . $name . "'"));
-
-                        //echo $elementId . ' ' . $file['fileName'] . '<br>';
-                        //новие файлы
-                        $debug['new'][$fieldNames['type']][] = [
-                            'name' => $fileFullParams['head']['name'],
-                        ];
-
-                        if (empty($elementId)) {
-                            $modx->db->insert($fields, $elementTable);
-                            $elementId = $modx->db->getValue($modx->db->query("select `id` from $elementTable where $fieldName ='" . $name . "'"));
-                        } else {
-                            $modx->db->update($fields, $elementTable, 'id = "' . $elementId . '"');
-                        }
-                        $config[$element][$elementId] = array('elementName' => $fileFullParams['head']['name'], 'fileName' => $file['fileName'], 'categoryId' => $categoryId, 'category' => $file['category'], 'date' => time());
-                    }
-                }
+        $files = array();
+        $parseFiles = array();
+        GetListFiles($elementPath, $files);
+        foreach ($files as $file) {
+            $resp = fileNameParse($elementPath, $file);
+            if (isset($resp)) {
+                $parseFiles[] = $resp;
             }
         }
 
+
+        $fieldNames = getFieldNames($element);
+
+
+        foreach ($parseFiles as $file) {
+
+            $categoryId = NULL;
+
+            if (isset($file['category'])) {
+                $categoryId = categoryCheck($file['category']);
+                $categoryId = $categoryId['id'];
+            }
+
+            $response = searchInArray($config[$element], $file['fileName']);
+            //echo $file['fileName'] .' - '.!empty($response).'<br>';
+            if (!empty($response)) { //если файл существует
+
+
+                $fileFull = $elementPath;
+                if (!empty($file['category'])) {
+                    $fileFull .= '/' . $file['category'];
+                }
+                $fileFull .= '/' . $file['fileName'];
+                $fileFullParams = filePars($fileFull);
+
+
+                if (filemtime($fileFull) != $response['date'] && isset($fileFullParams)) {
+                    // echo 'файл обновлен';
+                    $statusCheck = true;
+
+                    $fieldName = $fieldNames['name'];
+                    $elementTable = $fieldNames['tableName'];
+                    $code = $modx->db->escape($fileFullParams['body']);
+                    $code = str_replace_once('<?php', '', $code);
+
+                    $removeFirst = ['\r', '\n'];
+                    foreach ($removeFirst as $char) {
+                        if (substr($code, 0, 2) == $char) {
+                            $code = substr($code, 2);
+                        }
+
+                    }
+                    $fields = array(
+                        $fieldNames['name'] => $modx->db->escape($fileFullParams['head']['name']),
+                        $fieldNames['description'] => $modx->db->escape($fileFullParams['head']['description']),
+                        $fieldNames['code'] => $code,
+                        $fieldNames['category'] => 0,
+                    );
+
+                    if (!empty($categoryId)) {
+                        $fields['category'] = $categoryId;
+                    }
+                    $debug['update'][$fieldNames['type']][] = [
+                        'name' => $fileFullParams['head']['name'],
+                    ];
+                    $modx->db->update($fields, $elementTable, 'id = "' . $response['elementId'] . '"');
+                    $config[$element][$response['elementId']]['date'] = filemtime($fileFull); // обновляем дату
+                }
+
+
+            } else { //новый файл
+
+                $statusCheck = true;
+                //echo 'новый файл';
+                $fileFull = $elementPath;
+                if (!empty($file['category'])) {
+                    $fileFull .= '/' . $file['category'];
+                }
+                $fileFull .= '/' . $file['fileName'];
+
+                $fileFullParams = filePars($fileFull);
+                if (isset($fileFullParams)) {
+
+                    $code = $modx->db->escape($fileFullParams['body']);
+                    $code = str_replace_once('<?php', '', $code);
+
+                    $fields = array(
+                        $fieldNames['name'] => $fileFullParams['head']['name'],
+                        $fieldNames['description'] => $fileFullParams['head']['description'],
+                        $fieldNames['code'] => $code,
+                        $fieldNames['category'] => 0
+                    );
+                    if (!empty($categoryId)) {
+                        $fields['category'] = $categoryId;
+                    }
+                    $name = $modx->db->escape($fileFullParams['head']['name']);
+                    $fieldName = $fieldNames['name'];
+                    $elementTable = $fieldNames['tableName'];
+
+                    $elementId = $modx->db->getValue($modx->db->query("select `id` from $elementTable where $fieldName ='" . $name . "'"));
+
+                    //echo $elementId . ' ' . $file['fileName'] . '<br>';
+
+                    //новые файлы
+                    $debug['new'][$fieldNames['type']][] = [
+                        'name' => $fileFullParams['head']['name'],
+                    ];
+
+                    if (empty($elementId)) {
+                        $modx->db->insert($fields, $elementTable);
+                        $elementId = $modx->db->getValue($modx->db->query("select `id` from $elementTable where $fieldName ='" . $name . "'"));
+                    } else {
+                        $modx->db->update($fields, $elementTable, 'id = "' . $elementId . '"');
+                    }
+                    $config[$element][$elementId] = array('elementName' => $fileFullParams['head']['name'], 'fileName' => $file['fileName'], 'categoryId' => $categoryId, 'category' => $file['category'], 'date' => time());
+                }
+            }
+        }
     }
 
-}
-elseif(in_array($eventName,array('OnSnipFormSave','OnChunkFormSave','OnTempFormSave','OnPluginFormSave'))){
+} elseif (in_array($eventName, array('OnSnipFormSave', 'OnChunkFormSave', 'OnTempFormSave', 'OnPluginFormSave'))) {
 
-    $debugFile = $_SERVER['DOCUMENT_ROOT'].'/debug.txt';
+    $debugFile = $_SERVER['DOCUMENT_ROOT'] . '/debug.txt';
 
     //chunks,templates,snippets,plugins
-    switch($eventName){
+    switch ($eventName) {
         case 'OnSnipFormSave':
             $element = 'snippets';
             $table = $modx->getFullTableName('site_snippets');
@@ -669,14 +670,12 @@ elseif(in_array($eventName,array('OnSnipFormSave','OnChunkFormSave','OnTempFormS
     $elemDescription = $_POST[$fieldNames['description']];
     $elemCode = $_POST['post'];
 
-    $elemCode = str_replace("\r","", $elemCode);
 
-    $elemCategory = $modx->db->getValue($modx->db->query("select category from $table where id = ".$modx->event->params['id']));
+    $elemCategory = $modx->db->getValue($modx->db->query("select category from $table where id = " . $modx->event->params['id']));
 
     $expansion = $expansions[$element];
-    $fileName = translit($elemName) . '.' . $expansion;
+    $fileName = translit($elemName, $translit) . '.' . $expansion;
     //$fileName = $elemName . '.' . $expansion;
-
 
 
     $fileText = 'name:' . $elemName . PHP_EOL;
@@ -686,11 +685,9 @@ elseif(in_array($eventName,array('OnSnipFormSave','OnChunkFormSave','OnTempFormS
 
         //$modx->logEvent(1,1,$elemCode,'Заголовок лога');
 
-        if(strpos($elemCode,'<?php') === false) {
+        if (strpos($elemCode, '<?php') === false) {
             $fileText .= '<?php' . PHP_EOL;
-        }
-
-        else $fileText .= PHP_EOL;
+        } else $fileText .= PHP_EOL;
     }
     $fileText .= $elemCode;
 
@@ -699,35 +696,35 @@ elseif(in_array($eventName,array('OnSnipFormSave','OnChunkFormSave','OnTempFormS
 
     $categoryName = $categoryCheckResp['category'];
     $filePathFull = $elementsPath . $element . '/';
-    if ($elemCategory > 0) { // якщо елемент має категорію
+    if ($elemCategory > 0) { // у элемента есть категория
 
         $filePathFull .= $categoryName . '/';
     }
 
-    if (!file_exists($filePathFull)) {  // створюєм папку для категорії
+    if (!file_exists($filePathFull)) {  // создаем папку для категории
         if (!mkdir($filePathFull, 0755)) {
             $modx->logEvent(2002, 3, 'Не створена папка для категоії ' . $categoryName . ' елемент ' . $element, 'Не вдалось створити папку');
             return false;
         }
     }
 
-    if(isset($config[$element][$elemId]['categoryId'])){
-        // отримуэм стару категорію
+    if (isset($config[$element][$elemId]['categoryId'])) {
+        // удаляем старую категорию
         $oldPathFull = $elementsPath . $element . '/';
         $oldFileName = $config[$element][$elemId]['fileName'];
-        if($config[$element][$elemId]['categoryId']>0){
+        if ($config[$element][$elemId]['categoryId'] > 0) {
             $oldPathFull .= $config[$element][$elemId]['category'] . '/';
         }
     }
 
-    if(isset($config[$element][$elemId]['categoryId']) && ($elemCategory!=$config[$element][$elemId]['categoryId'] || $fileName!=$config[$element][$elemId]['fileName'])){
-        //видаляєм файл при зміні категорії чи назви
+    if (isset($config[$element][$elemId]['categoryId']) && ($elemCategory != $config[$element][$elemId]['categoryId'] || $fileName != $config[$element][$elemId]['fileName'])) {
+        //удаляем файл при смене категории
         unlink($oldPathFull . $oldFileName);
 
     }
 
 
-    fileWrite($filePathFull . $fileName, $fileText); //збрегшаєм файл
+    fileWrite($filePathFull . $fileName, $fileText); //создаем файл
     $config[$element][$elemId] = array(
         'elementName' => $elemName,
         'fileName' => $fileName,
@@ -738,13 +735,12 @@ elseif(in_array($eventName,array('OnSnipFormSave','OnChunkFormSave','OnTempFormS
 
     //file_put_contents($debugFile,$elemId);
     $statusCheck = false;
-}
-elseif(in_array($eventName,array('OnSnipFormDelete','OnChunkFormDelete','OnTempFormDelete','OnPluginFormDelete'))){
-    $debugFile = $_SERVER['DOCUMENT_ROOT'].'/debug.txt';
+} elseif (in_array($eventName, array('OnSnipFormDelete', 'OnChunkFormDelete', 'OnTempFormDelete', 'OnPluginFormDelete'))) {
+    $debugFile = $_SERVER['DOCUMENT_ROOT'] . '/debug.txt';
 
     $elemId = $eventParams['id'];
 
-    switch($eventName){
+    switch ($eventName) {
         case 'OnSnipFormDelete':
             $element = 'snippets';
             break;
@@ -763,48 +759,48 @@ elseif(in_array($eventName,array('OnSnipFormDelete','OnChunkFormDelete','OnTempF
 
     $elementConfig = $config[$element][$elemId];
 
-    $deleteElemPath = $elementsPath.$element.'/';
+    $deleteElemPath = $elementsPath . $element . '/';
 
-    if(!empty($elementConfig['category'])){
-        $deleteElemPath = $deleteElemPath.$elementConfig['category'].'/';
+    if (!empty($elementConfig['category'])) {
+        $deleteElemPath = $deleteElemPath . $elementConfig['category'] . '/';
     }
-    $deleteElemFull = $deleteElemPath. $elementConfig['fileName'];
-    if($FS->checkFile($deleteElemFull) === true){
+    $deleteElemFull = $deleteElemPath . $elementConfig['fileName'];
+    if ($FS->checkFile($deleteElemFull) === true) {
         unlink($deleteElemFull);
     }
-    file_put_contents($debugFile,$deleteElemFull);
+    file_put_contents($debugFile, $deleteElemFull);
     $statusCheck = false;
 }
 
-if($eventName=='OnPageNotFound' && $_GET['q']=='static-debug' && !empty($_SESSION['mgrShortname'])){
+if ($eventName == 'OnPageNotFound' && $_GET['q'] == 'static-debug' && !empty($_SESSION['mgrShortname'])) {
 
-    if(empty($_SESSION['static-debug'])){
+    if (empty($_SESSION['static-debug'])) {
         return '';
     }
     $debug = $_SESSION['static-debug'];
 
-    echo 'Последнее обновление '.$debug['work'].'<br>';
-    echo 'Время обновление '.$debug['time'].' секунд <br>';
+    echo 'Последнее обновление ' . $debug['work'] . '<br>';
+    echo 'Время обновления ' . $debug['time'] . ' секунд <br>';
 
-    if(is_array($debug['new'])){
-        echo 'Новие файлы <br>';
-        foreach ($debug['new'] as $key=>  $type){
-            echo '-- '.$key.'<br>';
-            foreach ($type as $e){
+    if (is_array($debug['new'])) {
+        echo 'Новые файлы <br>';
+        foreach ($debug['new'] as $key => $type) {
+            echo '-- ' . $key . '<br>';
+            foreach ($type as $e) {
 
-                echo '------- '.$e['name'].'<br>';
+                echo '------- ' . $e['name'] . '<br>';
             }
             echo '<br>';
 
         }
     }
-    if(is_array($debug['update'])){
-        echo 'Обновленние файлы <br>';
-        foreach ($debug['update'] as $key=>  $type){
-            echo '-- '.$key.'<br>';
-            foreach ($type as $e){
+    if (is_array($debug['update'])) {
+        echo 'Обновленные файлы <br>';
+        foreach ($debug['update'] as $key => $type) {
+            echo '-- ' . $key . '<br>';
+            foreach ($type as $e) {
 
-                echo '------- '.$e['name'].'<br>';
+                echo '------- ' . $e['name'] . '<br>';
             }
             echo '<br>';
 
@@ -815,36 +811,35 @@ if($eventName=='OnPageNotFound' && $_GET['q']=='static-debug' && !empty($_SESSIO
 fileWrite($elementsPath . $configFileName, json_encode($config));
 
 
-
 $time = microtime(true) - $start;
-$time =  sprintf('%.4F',$time);
+$time = sprintf('%.4F', $time);
 
-$debug['time']=$time;
-$debug['work']=date('d-m-Y h:i:s');
+$debug['time'] = $time;
+$debug['work'] = date('d-m-Y h:i:s');
 
 
-
-if($statusCheck){
+if ($statusCheck) {
     $modx->clearCache('full');
-    $_SESSION['static-debug']=$debug;
+    $_SESSION['static-debug'] = $debug;
     $redUrl = $_SERVER['REQUEST_URI'];
-    if(IN_MANAGER_MODE){
+    if (IN_MANAGER_MODE) {
         echo '<script>
         location.reload()
         </script>';
         die();
     }
-    if(!empty($_POST)){
-        $output = '<form method="post" action="'.$redUrl.'" id="myf-form">';
-        foreach($_POST as $key => $value){
-            $output .= '<textarea style="display:none" name="'.$key.'" >'.$value.'</textarea>';
+    if (!empty($_POST)) {
+        $output = '<form method="post" action="' . $redUrl . '" id="myf-form">';
+        foreach ($_POST as $key => $value) {
+            $output .= '<textarea style="display:none" name="' . $key . '" >' . $value . '</textarea>';
         }
         $output .= '</form>
         <script>
         document.getElementById("myf-form").submit();
         </script>
 ';
-        echo $output;die();
+        echo $output;
+        die();
     }
     header("Location: $redUrl");
     die();
