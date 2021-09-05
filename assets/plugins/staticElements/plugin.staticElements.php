@@ -198,7 +198,7 @@ if(!function_exists('fileNameParse')) {
 if(!function_exists('fileWrite')) {
     function fileWrite($file, $data)
     {
-        $file = iconv("UTF-8", "cp1251", $file); //имена файлов кириллицей
+        //$file = iconv("UTF-8", "cp1251", $file); //имена файлов кириллицей
         if ($handle = @fopen($file, 'w+')) {
             flock($handle, LOCK_EX);
             fwrite($handle, $data);
