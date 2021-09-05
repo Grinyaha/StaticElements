@@ -11,7 +11,7 @@
  * @internal    @events OnManagerPageInit,OnPageNotFound,OnWebPageInit,OnChunkFormDelete,OnChunkFormSave,OnPluginFormDelete,OnPluginFormSave,OnSnipFormDelete,OnSnipFormSave,OnTempFormDelete,OnTempFormSave
  * @internal    @modx_category system
  * @internal    @legacy_names StaticElements
- * @internal    @properties {"elementsPath":[{"label":"папка элементов","type":"string","value":"assets/elements/","default":"assets/elements/","desc":""}],"configFileName":[{"label":"Название конфиг-файла","type":"string","value":"config.php","default":"config.php","desc":""}],"translit":[{"label":"Транслит в именах файлов с кириллицей","type":"list","value":"нет","options":"да,нет","default":"да","desc":"Если файлы с кириллицей в кривой кодировке то надо включить"}],"onlyAdmin":[{"label":"Только для админа","type":"string","value":"1","default":"1","desc":""}],"showDebug":[{"label":"Дебаг","type":"string","value":"0","default":"0","desc":""}]}
+ * @internal    @properties {"elementsPath":[{"label":"папка элементов","type":"string","value":"assets/elements/","default":"assets/elements/","desc":""}],"configFileName":[{"label":"Название конфиг-файла","type":"string","value":"config.php","default":"config.php","desc":""}],"translit":[{"label":"Транслит в именах файлов с кириллицей","type":"list","value":"да","options":"да,нет","default":"да","desc":"Если файлы с кириллицей в кривой кодировке то надо включить"}],"onlyAdmin":[{"label":"Только для админа","type":"string","value":"1","default":"1","desc":""}],"showDebug":[{"label":"Дебаг","type":"string","value":"0","default":"0","desc":""}]}
  * @internal    @installset base
  *
  * @author Grishin Alexander (lagacy from Dzhuryn Volodymyr)
